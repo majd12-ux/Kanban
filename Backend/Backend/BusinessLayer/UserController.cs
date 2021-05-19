@@ -9,17 +9,29 @@ using IntroSE.Kanban.Backend.ServiceLayer;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Data.SQLite;
+using IntroSE.Kanban.Backend.DataAccessLayer.objectsControllers;
+using IntroSE.Kanban.Backend.DataAccessLayer;
+
+
 
 namespace IntroSE.Kanban.Backend.BusinessLayer
 {
-    internal class UserController
+    internal class UserController 
     {
         private const int minPassLength = 4;
         private const int maxPassLength = 20;
-        private  Dictionary<string, User> listOfUsers = new Dictionary<string, User>();
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private Dictionary<string, User> listOfUsers;
+        private Dictionary<string, LinkedList<Board>> listOfBoards;//we add board and remove board from my list and the key is the email.
 
-     
+        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private UserDcontroller uD;
+        //contructor....
+        internal UserController()
+        {
+            uD = new UserDcontroller();
+            listOfUsers = new Dictionary<string, User>();
+            listOfBoards = new Dictionary<string, LinkedList<Board>>();
+        }
         internal void ValidateEmailAndPassword(string email, string password)
         {
             if (!ContainEmail(email.ToLower()))
@@ -176,6 +188,44 @@ namespace IntroSE.Kanban.Backend.BusinessLayer
                 return false;
             }
         }
-      
+        internal void LoadUsers()
+        {
+            this.listOfUsers = new Dictionary<string, User>();
+            List<UserD> lst = uD.LoadAllUsers();
+            foreach (UserD u in lst)
+            {
+                listOfUsers.Add(u.Email, new User(u));
+            }
+        }
+
+        //deletes all the tables in the dataBase
+        public void DeleteData()
+        {
+           bool isDeleted= this.uD.DeleteAll();
+            if (!isDeleted)
+            {
+                throw new Exception("An Error Accured During Deletion Of Data!");
+            }
+        }
+       
+        public void addBoard(string name,string email)
+        {
+            if (!(IsValidEmail(email)))
+            {
+                log.Debug("throwing Exception: email is not valid");
+                throw new Exception("not valid Email");
+            }
+            if (listOfBoards.ContainsKey(email.ToLower()))//we check if the email is taken
+            {
+                listOfBoards[email].AddLast(new Board(name, email));
+
+            }
+            else
+            {
+                LinkedList<Board> bb = new LinkedList<Board>();
+                bb.AddLast(new Board(name, email));
+                listOfBoards.Add(email, bb);
+            }
+        }
     }
 }

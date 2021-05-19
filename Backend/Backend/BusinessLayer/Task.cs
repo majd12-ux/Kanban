@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IntroSE.Kanban.Backend.ServiceLayer;
+using IntroSE.Kanban.Backend.DataAccessLayer;
 using log4net;
 using System.Reflection;
 
@@ -16,32 +17,61 @@ namespace IntroSE.Kanban.Backend.BusinessLayer
         /// state = 0 for backlog, state = 1 for inprogress, state = 2 for done
         /// a user cant change the task if it in state = 2 (done)
         /// </summary>
-        private int id;
+        private int id;//check the column condition..
 
         private int taskId;
         private readonly DateTime creationTime;
         private string title;
         private string description;
         private DateTime dueDate;
-        
+        private string emailAssignee;
+        private TaskD TaskD;
+
+
         private readonly int maxTilteLength = 50;
         private readonly int maxDescriptionLength = 300;
 
         private string boardId;//assignee (who is the user in this column)
 
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        //*************************//constructors//***********************
-        internal Task(DateTime dueDate, string title, string description, string boardId, int taskId)
+        //getter
+        public int TaskId { get => taskId; set => taskId = value; }
+
+        public DateTime CreationTime => creationTime;
+
+        public string Title { get => title; set => title = value; }
+        public string Description { get => description; set => description = value; }
+        public DateTime DueDate { get => dueDate; set => dueDate = value; }
+        public string BoardId { get => boardId; set => boardId = value; }
+        public string EmailAssignee { get => emailAssignee; set => emailAssignee = value; }
+
+        //constructors//
+        internal Task(DateTime dueDate, string title, string description, string boardId, int taskId, string emailAssignee)
         {
             isValid(dueDate, title, description, boardId, taskId);
             
             this.creationTime = DateTime.Now;
-            this.dueDate = dueDate;
-            this.title = title;
-            this.description = description;
+            this.DueDate = dueDate;
+            this.Title = title;
+            this.Description = description;
+            this.emailAssignee = emailAssignee;
+            this.BoardId = boardId;
+            this.TaskD = new TaskD(taskId, this.creationTime.ToString(), this.dueDate.ToString(), this.title, this.description, this.emailAssignee);
+            TaskD.save();
             id = 0;
-            this.taskId = taskId;
-            this.boardId = boardId;
+            this.TaskId = (int)TaskD.Id ;
+
+        }
+        //converts a dataTask to a businessTask
+        internal Task(TaskD TD)
+        {
+            this.creationTime = DateTime.Parse(TD.CreationDate);
+            this.dueDate = DateTime.Parse(TD.DueDate);
+            this.title = TD.Title;
+            this.description = TD.Description;
+            this.emailAssignee = TD.Assignee;
+            this.TaskD = TD;
+            this.taskId = (int)TaskD.Id;
         }
 
         private void isValid(DateTime dueDate, string title, string description, string boardId, int taskId)
@@ -72,12 +102,18 @@ namespace IntroSE.Kanban.Backend.BusinessLayer
                 log.Debug("the description is too long");
                 throw new Exception("the description is too long");
             }
-            if (dueDate < creationTime)
+            if (dueDate < CreationTime)
             {
                 log.Debug("duedate alredy passed");
                 throw new Exception("duedate alredy passed");
             }
          
+        }
+        internal void AssignTask(string email, string emailAssignee)
+        {
+            if (!email.Equals(this.emailAssignee)) throw new Exception("only tasks assignee can change it");
+            this.TaskD.Assignee = emailAssignee;
+            this.emailAssignee = emailAssignee;
         }
 
         public void setState(int newId)
@@ -109,7 +145,7 @@ namespace IntroSE.Kanban.Backend.BusinessLayer
                 log.Debug("must enter a title");
                 throw new Exception("must enter a title");
             }
-            title = newTitle;
+            Title = newTitle;
         }
         public void changeDueDate(DateTime newDuedate)
         {
@@ -124,7 +160,7 @@ namespace IntroSE.Kanban.Backend.BusinessLayer
                 log.Debug("duedate alredy passed ");
                 throw new Exception("duedate alredy passed ");
             }
-            this.dueDate = newDuedate;
+            this.DueDate = newDuedate;
 
         }
         public void changeDescription(string newDescription)
@@ -141,34 +177,34 @@ namespace IntroSE.Kanban.Backend.BusinessLayer
                 log.Debug("too long title");
                 throw new Exception("too long title");
             }
-            description = newDescription;
+            Description = newDescription;
         }
         public string getDescription()
         {
-            if (description.Length == 0)
+            if (Description.Length == 0)
             {
                 log.Debug("description is empty");
                 throw new Exception("description is empty");
                 //return "description is now empty";
             }
            
-            return description;
+            return Description;
         }
         public int getTaskId()
         {
-            return taskId;
+            return TaskId;
         }
         public DateTime GetCreationTime()
         {
-            return creationTime; 
+            return CreationTime; 
         }
         public string getTitle()
         {
-            return title;
+            return Title;
         }
         public DateTime getDueDate()
         {
-            return dueDate;
+            return DueDate;
         }
        
 

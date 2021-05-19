@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations;
 using log4net;
 using System.Reflection;
 using System.Globalization;
+using IntroSE.Kanban.Backend.DataAccessLayer;
 
 namespace IntroSE.Kanban.Backend.BusinessLayer
 {
@@ -14,6 +15,8 @@ namespace IntroSE.Kanban.Backend.BusinessLayer
     {
         private volatile bool login;
         public string email;
+        private long id;//we have to check that.
+        private UserD userD;//we add this to do save and delete in database.
         private string password { get; set; }
         List<string> oldPasswords = new List<string>();
         private const int minPassLength = 4;
@@ -29,7 +32,18 @@ namespace IntroSE.Kanban.Backend.BusinessLayer
                     this.password = password;
                     oldPasswords.Add(password);
                     login = false;
+                    this.userD = new UserD(email, password);
+                  userD.save();//SAVE IN DATABASE.
+                 this.id = userD.Id;
+
                 }
+        }
+        internal User(UserD D)
+        {
+            this.id = D.Id;
+            this.email = D.Email;
+            this.password = D._password;
+            this.userD = D;
         }
         internal bool isLoggedIn()
         {

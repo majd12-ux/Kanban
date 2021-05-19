@@ -73,8 +73,18 @@ namespace IntroSE.Kanban.Backend.BusinessLayer
             tasksDictionary.Remove(taskId);
             numOfTasks = numOfTasks - 1;
         }
-//adding a new task
-        internal Task addNewTask(DateTime dueDate, string title, string description, int taskid)
+        internal void AssignTask(string email, int taskId, string emailAssignee)
+        {
+            if (!this.tasksDictionary.ContainsKey(taskId))
+            {
+                log.Debug("throwing Exception: Id does not exist");
+                throw new Exception("Id does not exist");
+            }
+            Task task = this.tasksDictionary[taskId];
+            task.AssignTask(email, emailAssignee);
+        }
+        //adding a new task
+        internal Task addNewTask(DateTime dueDate, string title, string description, int taskid,string emailAssignee)
         {
             //throw exception if unlegal task or this is not backlog column
             if (getid() == 1 | getid() == 2)
@@ -87,7 +97,7 @@ namespace IntroSE.Kanban.Backend.BusinessLayer
                 log.Debug("no place for new Task in this column");
                 throw new Exception("no place for new Task in this column");
             }
-            Task newTask = new Task(dueDate, title, description, getBoardId(), taskid);
+            Task newTask = new Task(dueDate, title, description, getBoardId(), taskid, emailAssignee);
             tasksDictionary.Add(newTask.getTaskId(), newTask);
             listOfTasks.Add(newTask);
             numOfTasks++;

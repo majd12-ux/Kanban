@@ -28,9 +28,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DataAccessLayer\ObjectsD\" />
-    <Folder Include="DataAccessLayer\objectsControllers\" />
-  </ItemGroup>
-
 </Project>

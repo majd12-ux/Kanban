@@ -24,6 +24,31 @@ namespace IntroSE.Kanban.Backend.ServiceLayer
         {
             return BC;
         }
+        public Response DeleteData()
+        {
+            try
+            {
+                BC.DeleteData();
+                return new Response();
+            }
+            catch (Exception ex)
+            {
+                return new Response(ex.Message);
+            }
+        }
+        public Response LoadData()
+        {
+            try
+            {
+                BC.LoadAllBoards();
+                return new Response();
+            }
+            catch (Exception e)
+            {
+                return new Response(e.Message);
+            }
+        }
+
         public Response LimitColumn(string email, string name, int columnOrdinal, int limit)
         {
             try
@@ -70,14 +95,14 @@ namespace IntroSE.Kanban.Backend.ServiceLayer
         }
 
         
-        public Response<Task> AddTask(string email, string name, string title, string description, DateTime dueDate)
+        public Response<Task> AddTask(string email, string name, string title, string description, DateTime dueDate,string assigne)
         {
             try
             {
                 UC.ValidateUserLoggin(email);
-                BusinessLayer.Task task = BC.AddTask(email, name, title, description, dueDate);
+                BusinessLayer.Task task = BC.AddTask(email, name, title, description, dueDate, assigne);
                 log.Info("new task added to "+  email+" boards, with title: '"+title+"'+ in board "+ name);
-                Task t = new Task(task.getTaskId(), task.GetCreationTime(), title, description, dueDate);
+                Task t = new Task(task.getTaskId(), task.GetCreationTime(), title, description, dueDate, assigne);
                 return Response<Task>.FromValue(t);
             }
             catch (Exception e)
@@ -152,7 +177,7 @@ namespace IntroSE.Kanban.Backend.ServiceLayer
                 IList<BusinessLayer.Task> BTasksList = BC.GetTasksList(email, name, columnOrdinal);
                 foreach (BusinessLayer.Task t in BTasksList)
                 {
-                    Task j = new Task(t.getTaskId(), t.GetCreationTime(), t.getTitle(), t.getDescription(), t.getDueDate());
+                    Task j = new Task(t.getTaskId(), t.GetCreationTime(), t.getTitle(), t.getDescription(), t.getDueDate(),t.EmailAssignee);
                     tasks.Add(j);
                 }
                 

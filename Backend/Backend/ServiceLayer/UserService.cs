@@ -26,6 +26,18 @@ namespace IntroSE.Kanban.Backend.ServiceLayer
         {
             return this.userController;
         }
+        public Response LoadData()
+        {
+            try
+            {
+                userController.LoadUsers();
+                return new Response();
+            }
+            catch (Exception ex)
+            {
+                return new Response(ex.Message);
+            }
+        }
         public Response register(string email, string password)
         {
 
@@ -82,7 +94,7 @@ namespace IntroSE.Kanban.Backend.ServiceLayer
                 IList<BusinessLayer.Task> listOFTasks = userController.getUser(email).importInProgressTasks();
                 foreach (BusinessLayer.Task t in listOFTasks)
                 {
-                    Task STask = new Task(t.getTaskId(), t.GetCreationTime(), t.getTitle(), t.getDescription(), t.getDueDate());
+                    Task STask = new Task(t.getTaskId(), t.GetCreationTime(), t.getTitle(), t.getDescription(), t.getDueDate(),t.EmailAssignee);
                     tasks.Add(STask);
                 }
                 return Response<IList<Task>>.FromValue(tasks);
@@ -92,6 +104,18 @@ namespace IntroSE.Kanban.Backend.ServiceLayer
                 return Response<IList<Task>>.FromError(e.Message);
             }
 
+        }
+        public Response DeleteData()
+        {
+            try
+            {
+                userController.DeleteData();
+                return new Response();
+            }
+            catch (Exception e)
+            {
+                return new Response(e.Message);
+            }
         }
     }
 }
