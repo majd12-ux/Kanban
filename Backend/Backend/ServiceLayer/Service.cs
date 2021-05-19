@@ -87,9 +87,9 @@ namespace IntroSE.Kanban.Backend.ServiceLayer
         /// <param name="boardName">The name of the board</param>
         /// <param name="columnOrdinal">The column ID. The first column is identified by 0, the ID increases by 1 for each column</param>
         /// <returns>The limit of the column.</returns>
-        public Response<int> GetColumnLimit(string userEmail, string creatorEmail, string boardName, int columnOrdinal)
+        public Response<int> GetColumnLimit(string userEmail, string creatorEmail, string boardNam, int columnOrdinal)
         {
-            return boardService.GetLimitColumn(userEmail, boardName, columnOrdinal);
+            return boardService.GetLimitColumn(userEmail, boardNam, columnOrdinal);
         }
 
         /// <summary>
