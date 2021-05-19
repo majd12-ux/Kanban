@@ -89,7 +89,7 @@ namespace IntroSE.Kanban.Backend.ServiceLayer
         /// <returns>The limit of the column.</returns>
         public Response<int> GetColumnLimit(string userEmail, string creatorEmail, string boardName, int columnOrdinal)
         {
-            throw new NotImplementedException();
+            return boardService.GetLimitColumn(userEmail, boardName, columnOrdinal);
         }
 
         /// <summary>
